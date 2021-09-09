@@ -1,24 +1,33 @@
+import 'package:base_app_with_dark_theme/app_state.dart';
+import 'package:base_app_with_dark_theme/app_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider<AppState>(
+      child: MyApp(),
+      create: (context) => AppState(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      darkTheme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
-      home: TaskPage(),
+    return Consumer<AppState>(
+      builder: (context, appState, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Flutter Demo',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: appState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          home: TaskPage(),
+        );
+      },
     );
   }
 }
@@ -51,9 +60,7 @@ class TaskPage extends StatelessWidget {
               children: [
                 Text(
                   'Today',
-                  style: TextStyle(
-                    fontSize: 48,
-                  ),
+                  style: Theme.of(context).textTheme.headline1,
                 ),
                 Icon(Icons.add_circle_outline)
               ],
@@ -74,13 +81,45 @@ class TaskPage extends StatelessWidget {
                 horizontal: 16,
               ),
               child: ListTile(
-                leading: Icon(Icons.call),
-                title: Text('Confrence Call'),
-                subtitle: Text('30 Mins'),
-                trailing: Icon(Icons.check_circle),
+                leading: Icon(
+                  Icons.call,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                title: Text(
+                  'Confrence Call',
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+                subtitle: Text(
+                  '30 Mins',
+                  style: Theme.of(context).textTheme.bodyText2,
+                ),
+                trailing: Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
               ),
             ),
           ),
+          Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Text(
+                  'Dark Mode',
+                  style: Theme.of(context).textTheme.bodyText2,
+                ),
+                Spacer(),
+                Switch(
+                  value: Provider.of<AppState>(context).isDarkMode,
+                  onChanged: (value) {
+                    Provider.of<AppState>(context, listen: false)
+                        .updateTheme(value);
+                  },
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );
